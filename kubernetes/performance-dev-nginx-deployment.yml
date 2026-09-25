@@ -23,6 +23,8 @@ spec:
       labels:
         tier: frontend-dev
     spec:
+      imagePullSecrets:
+      - name: tbsdevacr-pull
       containers:
       - image: tbsdevacr.azurecr.io/performance-dev_nginx:latest
         imagePullPolicy: Always
