@@ -39,10 +39,11 @@ jobs:
         docker build -f ./docker/performance-dev_nginx/Dockerfile . \
           -t performance-dev_nginx:${{ github.sha }}
 
-    # Catches malformed manifests without contacting the cluster.
+    # Validates manifests against the Kubernetes schemas offline. kubectl
+    # dry-run cannot be used here: it needs a cluster to fetch schemas from,
+    # and this workflow deliberately has no cluster access.
     - name: Validate Kubernetes manifests
       run: |
-        for manifest in kubernetes/*.yml; do
-          echo "--- $manifest"
-          kubectl apply --dry-run=client -f "$manifest"
-        done
+        curl -sSL https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz \
+          | tar xz kubeconform
+        ./kubeconform -strict -summary kubernetes/*.yml
